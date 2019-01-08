@@ -1,0 +1,19 @@
+for h in number_family:
+    for j in K:
+        if j[0] == h:
+            for nd in number_date:
+                temp = []
+                if nd ==j[4]:
+                    temp.append(j[5])
+                    print(len(temp))
+                    print(temp)
+#            print(j[1],j[4])
+        else:
+            pass
+			
+			
+			
+
+			
+			
+
