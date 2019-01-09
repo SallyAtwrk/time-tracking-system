@@ -4,15 +4,14 @@ from datetime import datetime
 import time
 import sys
 import openpyxl
+
 wb = openpyxl.Workbook()
 ws = wb.active
-ws.cell(column = 1, row = 1, value = 'Фамилия')
-ws.cell(column = 2, row = 1, value = 'Дата')
-ws.cell(column = 3, row = 1, value = 'Отметка входа')
-ws.cell(column = 4, row = 1, value = 'Отметка выхода')
-ws.cell(column = 5, row = 1, value = 'Общее время работы')
-ws.cell(column = 6, row = 1, value = 'Переботка')
-ws.cell(column = 7, row = 1, value = 'Примечания')
+topicsList={'Фамилия', 'Дата', 'Отметка входа', 'Отметка выхода', 'Общее время работы', 'Переботка', 'Примечания'}
+topicCounter=1
+for topic in topicsList:
+    ws.cell(column = topicCounter, row = 1, value = topic)
+    topicCounter+=1
 full_info = {}
 time_str = '00:00:00'
 count = 2 #Начальное значение счетчика. С помощью этой переменной определяется значеение счетчика 
