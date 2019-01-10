@@ -1,10 +1,9 @@
-from secondary_func import*
+﻿from secondary_func import*
 from datetime import timedelta
 from datetime import datetime
 import time
 import sys
 import openpyxl
-
 wb = openpyxl.Workbook()
 ws = wb.active
 topicsList={'Фамилия', 'Дата', 'Отметка входа', 'Отметка выхода', 'Общее время работы', 'Переботка', 'Примечания'}
@@ -21,10 +20,9 @@ time_comparison = timedelta(seconds=0) #Разница между реально
 recycling_seconds = 0
 recycling_hour = 0.0
 recycling_hour_round = 0.0
+tag = '0'
 recycling_data = time.strftime('%H:%M:%S', time.gmtime(abs(recycling_seconds)))
-money_rate_8h = 1000.0
-wage = 0.0
-f = open('tst_0','r')# Иеальные данные tst_0/Не идеальные данные tst_1 Загрузка файла с данными
+f = open('12_2018','r')# Иеальные данные tst_0/Не идеальные данные tst_1 Загрузка файла с данными
 for line in f:# Перебор всех строк в файле с данными
     Y = line[8:29]
     date_and_time = datetime.strptime(line[10:29], "%Y-%m-%d %H:%M:%S")
@@ -39,11 +37,11 @@ for line in f:# Перебор всех строк в файле с данным
         if full_info[date][U][1] > date_and_time:
             full_info[date][U][1] = date_and_time
     else:
-        full_info[date][U] = [date_and_time, date_and_time,delta_work,recycling_seconds,recycling_hour,recycling_hour_round,recycling_data,wage]
+        full_info[date][U] = [date_and_time, date_and_time,delta_work,recycling_seconds,recycling_hour,recycling_hour_round,recycling_data,tag]
 number_family = [1,2,3,4,5,6,7,8,9,10] ; #id работников 
 year = input("Get a year: ") # ввод года для построения табеля
 month = input("Get a month: ") # ввод месяц для построения табеля
-last_day = monthrange(int(year), int(month))[1]
+last_day = monthrange(int(year), int(month))[1] # Определение последнего дня месяца? 
 a = datetime(int(year), int(month), 1) ;
 b = datetime(int(year), int(month), last_day)
 for dt in daterange(a, b, inclusive=True):
@@ -87,20 +85,28 @@ for dt in daterange(a, b, inclusive=True):
               recycling_seconds = work_delta_seconds - work_time.seconds
               recycling_hour = recycling_seconds/3600
               recycling_hour_round = round(recycling_hour,2)
-              if recycling_seconds >= 0:
-                full_info[date][i][3] = recycling_seconds
-                full_info[date][i][4] = recycling_hour
-                full_info[date][i][5] = recycling_hour_round
-                rec_recycling = ws.cell(column = 6, row = count, value = full_info[date][i][5])
+              recycling_data = time.strftime('%H:%M:%S', time.gmtime(abs(recycling_seconds)))
+              full_info[date][i][3] = recycling_seconds
+              full_info[date][i][4] = recycling_hour
+              full_info[date][i][5] = recycling_hour_round
+              full_info[date][i][6] = recycling_data
+              auto_tag = 'auto'
+              full_info[date][i][7] = auto_tag
+              if full_info[date][i][3] >= 0:
+                info_auto = 'Ручной ввод'
+                rec_recycling = ws.cell(column = 7, row = count, value = info_auto)
+                rec_recycling = ws.cell(column = 6, row = count, value = full_info[date][i][6])
               else:
-                full_info[date][i][3] = recycling_seconds
-                full_info[date][i][4] = recycling_hour
-                full_info[date][i][5] = recycling_hour_round
-                rec_recycling = ws.cell(column = 6, row = count, value = full_info[date][i][5])
+                info_auto = 'Ручной ввод'
+                rec_recycling = ws.cell(column = 7, row = count, value = info_auto)
+                info_1 = '- ' + str(full_info[date][i][6])
+                rec_recycling = ws.cell(column = 6, row = count, value = info_1)
+              auto_tag = 'no_auto'
+              full_info[date][i][7] = auto_tag
           else:
             print('Введите правильный пункт меню!')
         else:
-          work_delta = full_info[date][i][0] - full_info[date][i][1]
+          work_delta = full_info[date][i][0] - full_info[date][i][1]#Короче весь этот блок надо переделывать. Полность. Считать через секунды и формировать значения из  секунд. Еще надо сменить название переменной переботки на более корректное. Добавить id новых сотрудинов, выкинуть Федоровича из программы. Разобраться с форматированнием вывода времени и даты. Разобраться с ранжированием месяца.
           work_delta_seconds = work_delta.seconds
           value_for_record = datetime.time(full_info[date][i][0])
           rec_time_start = ws.cell(column = 4, row = count, value = value_for_record)
@@ -109,31 +115,36 @@ for dt in daterange(a, b, inclusive=True):
           full_info[date][i][2] = work_delta
           rec_delta = ws.cell(column = 5, row = count, value = full_info[date][i][2])
           recycling_seconds = work_delta_seconds - work_time.seconds
-          money_rate_1s = money_rate_8h/(8*3600)
-          money_rate_1h = money_rate_8h/8
-          wage_recycling_seconds = recycling_seconds*money_rate_1s
           recycling_hour = recycling_seconds/3600
-          recycling_hour_round = round(recycling_hour,2)
-          wage_recycling_hour = recycling_hour*money_rate_1h
-          wage_recycling_hour_round = recycling_hour_round*money_rate_1h
+          recycling_hour_round = round(recycling_hour,2) 
           recycling_data = time.strftime('%H:%M:%S', time.gmtime(abs(recycling_seconds)))
           full_info[date][i][3] = recycling_seconds
           full_info[date][i][4] = recycling_hour
           full_info[date][i][5] = recycling_hour_round
           full_info[date][i][6] = recycling_data
-          full_info[date][i][7] = wage_recycling_seconds
-          rec_recycling = ws.cell(column = 6, row = count, value = full_info[date][i][6])
-          #print('Зарплата через секунды:',wage_recycling_seconds,'\n\n\nЗарплата через часы без округления:',wage_recycling_hour,'\n\n\nЗарплата через часы с округлением:',wage_recycling_hour_round)
+          auto_tag = 'auto'
+          full_info[date][i][7] = auto_tag
+          if full_info[date][i][3] >= 0:
+                info_auto = 'Автоматика'
+                rec_recycling = ws.cell(column = 7, row = count, value = info_auto)
+                rec_recycling = ws.cell(column = 6, row = count, value = full_info[date][i][6])
+          else:
+                info_auto = 'Автоматика'
+                rec_recycling = ws.cell(column = 7, row = count, value = info_auto)
+                info_1 = '- ' + str(full_info[date][i][6])
+                rec_recycling = ws.cell(column = 6, row = count, value = info_1)
           count = count +1
       else:
           value_for_record = datetime.time(full_info[date][i][0])
           rec_time_start = ws.cell(column = 3, row = count, value = value_for_record)
+          auto_tag = 0
+          full_info[date][i][7] = auto_tag
           count = count +1
     else:
         pass
     
 
-wb.save("Проверочная таблица.xlsx")
+wb.save("Декабрь_2018_вариант_1.xlsx")
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 list_print_1 = []
 list_print_2 = []
@@ -154,53 +165,71 @@ for dt in daterange(a, b, inclusive=True):
 for i in list_print_1:
     if not 'Еремин' in i:
         if 'переработка:' in i:
-            #print(i)
-            pass
+            print(i)
         else:
-            #print(i,file=sys.stderr)
-            pass
+            print(i,file=sys.stderr)
     else:
         pass
 print('---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
 for n in list_print_2:
-    #print(n)
-    pass
+    print(n)
+print('FINAL!')
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-list_wage = []
-info_wage = {}
-
-
+count = 2
+wb_1 = openpyxl.Workbook()
+ws_1 = wb_1.active
+ws_1.cell(column = 1, row = 1, value = 'Фамилия')
+ws_1.cell(column = 2, row = 1, value = 'Дата')
+ws_1.cell(column = 3, row = 1, value = 'Отметка входа')
+ws_1.cell(column = 4, row = 1, value = 'Отметка выхода')
+ws_1.cell(column = 5, row = 1, value = 'Общее время работы')
+ws_1.cell(column = 6, row = 1, value = 'Переботка')
+ws_1.cell(column = 7, row = 1, value = 'Примечания')
 for dt in daterange(a, b, inclusive=True):
     date = dt.strftime("%Y-%m-%d")
     if date in full_info.keys():
         for i in full_info[date].keys():
-                if not i in info_wage.keys():
-                        info_wage[i] = {}
-                elif i in info_wage.keys():
-                        if not date in info_wage[i].keys():
-                                info_wage[i][date]=[full_info[date][i][2],full_info[date][i][3]]
-                else:   
-                        pass
-recycling_all_money = 0
-recycling_all_time = 0
-for i in number_family:
-        if i in info_wage.keys():
-                days = len(info_wage[i])
-                for dt in daterange(a, b, inclusive=True):
-                        date = dt.strftime("%Y-%m-%d")
-                        for date in info_wage[i].keys():
-                                recycling_money = info_wage[i][date][1]*money_rate_1s
-                                recycling_all_money = recycling_all_money
-                                recycling_all_time = recycling_all_time + info_wage[i][date][1]
-                recycling_all_time_str = time.strftime('%H:%M:%S', time.gmtime(recycling_all_time))
-                wage_all = days*money_rate_8h + recycling_all_money
-                wage_all_round = round(wage_all,3)
-                name = replace_name(i)
-                print('\n\n\t',name,'\nЗарплата:  ',wage_all,'\n\nОбщаяя переработка: ', recycling_all_time_str)
-                print('\n\n\n\n\n',recycling_all_time)
-
-
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            name = replace_name(i)
+            rec_name = ws_1.cell(column = 1, row = count, value = name)
+            rec_date = ws_1.cell(column = 2, row = count, value = date)
+            if name != 'Рощин':
+                value_for_record = datetime.time(full_info[date][i][0])
+                rec_time_start = ws_1.cell(column = 3, row = count, value = value_for_record)
+                value_for_record = datetime.time(full_info[date][i][1])
+                rec_time_end = ws_1.cell(column = 4, row = count, value = value_for_record)
+                rec_delta = ws_1.cell(column = 5, row = count, value = full_info[date][i][2])
+                if full_info[date][i][3] >= 0:
+                        if full_info[date][i][7]!= 'auto':
+                                info_auto = 'Ручной ввод'
+                                rec_recycling = ws_1.cell(column = 7, row = count, value = info_auto)
+                                print(full_info[date][i][6],'Переработка')
+                                rec_recycling = ws_1.cell(column = 6, row = count, value = full_info[date][i][6])
+                        else:
+                             info_auto = 'Автоматика'
+                             rec_recycling = ws_1.cell(column = 7, row = count, value = info_auto)
+                             print(full_info[date][i][6],'Переработка')
+                             rec_recycling = ws_1.cell(column = 6, row = count, value = full_info[date][i][6])
+                else:
+                        if full_info[date][i][7]!= 'auto':
+                                info_auto = 'Ручной ввод'
+                                info_1 = '- ' + str(full_info[date][i][6])
+                                rec_recycling = ws_1.cell(column = 7, row = count, value = info_auto)
+                                print(full_info[date][i][6],'Переработка')
+                                rec_recycling = ws_1.cell(column = 6, row = count, value = info_1)
+                        else:
+                             info_auto = 'Автоматика'
+                             info_1 = '- ' + str(full_info[date][i][6])
+                             rec_recycling = ws_1.cell(column = 7, row = count, value = info_auto)
+                             print(full_info[date][i][6],'Переработка')
+                             rec_recycling = ws_1.cell(column = 6, row = count, value = info_1)
+            else:
+                value_for_record = datetime.time(full_info[date][i][0])
+                rec_time_start = ws_1.cell(column = 3, row = count, value = value_for_record)
+            count += 1
+print('----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
+wb_1.save("Декабрь_2018_вариант_2.xlsx")
+print('Файл сформирован')
+for n in list_print_2:
+    print(n)
 print('FINAL!')
-#print(full_info)
 esc_out = input()
