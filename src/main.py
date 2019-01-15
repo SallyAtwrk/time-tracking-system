@@ -4,6 +4,8 @@ from datetime import datetime
 import time
 import sys
 import openpyxl
+import os
+
 wb = openpyxl.Workbook()
 ws = wb.active
 topicsList={'Фамилия', 'Дата', 'Отметка входа', 'Отметка выхода', 'Общее время работы', 'Переботка', 'Примечания'}
@@ -22,7 +24,8 @@ recycling_hour = 0.0
 recycling_hour_round = 0.0
 tag = '0'
 recycling_data = time.strftime('%H:%M:%S', time.gmtime(abs(recycling_seconds)))
-f = open('resources/12_2018','r')# Иеальные данные tst_0/Не идеальные данные tst_1 Загрузка файла с данными
+
+f = open((os.path.join(os.path.dirname(__file__), '..', 'resources', '12_2018.dat')), 'r')# Иеальные данные tst_0/Не идеальные данные tst_1 Загрузка файла с данными
 for line in f:# Перебор всех строк в файле с данными
     Y = line[8:29]
     date_and_time = datetime.strptime(line[10:29], "%Y-%m-%d %H:%M:%S")
@@ -32,12 +35,16 @@ for line in f:# Перебор всех строк в файле с данным
     if not  date in full_info.keys():
         full_info[date] = {}
     if U in full_info[date].keys():
-        if full_info[date][U][0] < date_and_time:
+        if full_info[date][U][0] > date_and_time:
             full_info[date][U][0] = date_and_time
-        if full_info[date][U][1] > date_and_time:
+        if full_info[date][U][1] < date_and_time:
             full_info[date][U][1] = date_and_time
     else:
         full_info[date][U] = [date_and_time, date_and_time,delta_work,recycling_seconds,recycling_hour,recycling_hour_round,recycling_data,tag]
+with open('debug.txt', 'w') as debug:
+    for lines in full_info:
+       debug.write(lines)
+       
 number_family = [1,2,3,4,5,6,7,8,9,10] ; #id работников 
 year = input("Get a year: ") # ввод года для построения табеля
 month = input("Get a month: ") # ввод месяц для построения табеля
@@ -106,12 +113,12 @@ for dt in daterange(a, b, inclusive=True):
           else:
             print('Введите правильный пункт меню!')
         else:
-          work_delta = full_info[date][i][0] - full_info[date][i][1]#Короче весь этот блок надо переделывать. Полность. Считать через секунды и формировать значения из  секунд. Еще надо сменить название переменной переботки на более корректное. Добавить id новых сотрудинов, выкинуть Федоровича из программы. Разобраться с форматированнием вывода времени и даты. Разобраться с ранжированием месяца.
+          work_delta = full_info[date][i][1] - full_info[date][i][0]#Короче весь этот блок надо переделывать. Полность. Считать через секунды и формировать значения из  секунд. Еще надо сменить название переменной переботки на более корректное. Добавить id новых сотрудинов, выкинуть Федоровича из программы. Разобраться с форматированнием вывода времени и даты. Разобраться с ранжированием месяца.
           work_delta_seconds = work_delta.seconds
           value_for_record = datetime.time(full_info[date][i][0])
-          rec_time_start = ws.cell(column = 4, row = count, value = value_for_record)
+          rec_time_start = ws.cell(column = 3, row = count, value = value_for_record)
           value_for_record = datetime.time(full_info[date][i][1])
-          rec_time_end = ws.cell(column = 3, row = count, value = value_for_record)
+          rec_time_end = ws.cell(column = 4, row = count, value = value_for_record)
           full_info[date][i][2] = work_delta
           rec_delta = ws.cell(column = 5, row = count, value = full_info[date][i][2])
           recycling_seconds = work_delta_seconds - work_time.seconds
@@ -194,9 +201,9 @@ for dt in daterange(a, b, inclusive=True):
             rec_date = ws_1.cell(column = 2, row = count, value = date)
             if name != 'Рощин':
                 value_for_record = datetime.time(full_info[date][i][0])
-                rec_time_start = ws_1.cell(column = 3, row = count, value = value_for_record)
+                rec_time_start = ws_1.cell(column = 4, row = count, value = value_for_record) #3
                 value_for_record = datetime.time(full_info[date][i][1])
-                rec_time_end = ws_1.cell(column = 4, row = count, value = value_for_record)
+                rec_time_end = ws_1.cell(column = 3, row = count, value = value_for_record) #4
                 rec_delta = ws_1.cell(column = 5, row = count, value = full_info[date][i][2])
                 if full_info[date][i][3] >= 0:
                         if full_info[date][i][7]!= 'auto':
@@ -233,3 +240,5 @@ for n in list_print_2:
     print(n)
 print('FINAL!')
 esc_out = input()
+print(full_info)
+
