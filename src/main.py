@@ -15,7 +15,7 @@ for topic in topicsList:
     topicCounter+=1
 full_info = {}
 time_str = '00:00:00'
-count = 2 #Начальное значение счетчика. С помощью этой переменной определяется значеение счетчика 
+count = 2 #Начальное значение счетчика. С помощью этой переменной определяется значеение счетчика
 delta_work = datetime.strptime(time_str,"%H:%M:%S")# Реально отработанное время
 work_time = timedelta(hours=8)# Длительность рабочего дня
 time_comparison = timedelta(seconds=0) #Разница между реально отработанным временем и длительностью рабочего дня
@@ -44,11 +44,11 @@ for line in f:# Перебор всех строк в файле с данным
 with open('debug.txt', 'w') as debug:
     for lines in full_info:
        debug.write(lines)
-       
-number_family = [1,2,3,4,5,6,7,8,9,10] ; #id работников 
+
+number_family = [1,2,3,4,5,6,7,8,9,10] ; #id работников
 year = input("Get a year: ") # ввод года для построения табеля
 month = input("Get a month: ") # ввод месяц для построения табеля
-last_day = monthrange(int(year), int(month))[1] # Определение последнего дня месяца? 
+last_day = monthrange(int(year), int(month))[1] # Определение последнего дня месяца?
 a = datetime(int(year), int(month), 1) ;
 b = datetime(int(year), int(month), last_day)
 for dt in daterange(a, b, inclusive=True):
@@ -68,16 +68,54 @@ for dt in daterange(a, b, inclusive=True):
             time_inp = input('\n\n\tВведите пункт меню:')
             if time_inp == '1' or time_inp == '2':
               l = 1
+              c = False
               if time_inp == '1':
-                time_begin = input('Введите время прихода в формате час*ПРОБЕЛ*минуты*секунды(если есть)')
-                time_begin_str = date + ' ' + time_begin
-                time_begin_z = datetime.strptime(time_begin_str,"%Y-%m-%d %H %M %S")
-                full_info[date][i][0] = time_begin_z
-              elif time_inp == '2': 
-                time_end = input('Введите время ухода в формате час*ПРОБЕЛ*минуты*секунды(если есть)')
-                time_end_str = date + ' ' + time_end
-                time_end_z = datetime.strptime(time_end_str,"%Y-%m-%d %H %M %S")
-                full_info[date][i][1] = time_end_z
+                time_begin = input('Введите время прихода в формате час,минуты,секунды БЕЗ ПРОБЕЛОВ: ')
+                while c is False:
+                    if time_begin.isdigit():
+                        if len(time_begin) == 6:
+                            if int(time_begin[0:2]) in range(0,24):
+                                if int(time_begin[2:4]) in range(0,60):
+                                    if int(time_begin[4:6]) in range(0,60):
+                                        print('Данные приняты')
+
+                                        time_begin_str = date + ' ' + time_begin[0:2]+' '+time_begin[2:4] +' '+time_begin[4:6]+ time_begin
+                                        time_begin_z = datetime.strptime(time_begin_str,"%Y-%m-%d %H %M %S")
+                                        full_info[date][i][0] = time_begin_z
+                                        c = True
+                                    else:
+                                        print('Введите данные в правильном формате!')
+                                else:
+                                    print('Введите данные в правильном формате!')
+                            else:
+                                print('Введите данные в правильном формате!')
+                        else:
+                            print('Введите данные в правильном формате!')
+                    else:
+                        print('Введите данные в правильном формате!')
+              elif time_inp == '2':
+                time_end = input('Введите время ухода в формате час,минуты,секунды БЕЗ ПРОБЕЛОВ: ')
+                while c is False:
+                    if time_end.isdigit():
+                        if len(time_end) == 6:
+                            if int(time_end[0:2]) in range(0,24):
+                                if int(time_end[2:4]) in range(0,60):
+                                    if int(time_end[4:6]) in range(0,60):
+                                        print('Данные приняты')
+                                        time_end_str = date + ' '+ time_end[0:2]+' '+time_end[2:4] +' '+time_end[4:6]
+                                        time_end_z = datetime.strptime(time_end_str,"%Y-%m-%d %H %M %S")
+                                        full_info[date][i][1] = time_end_z
+                                        c = True
+                                    else:
+                                        print('Введите данные в правильном формате!')
+                                else:
+                                    print('Введите данные в правильном формате!')
+                            else:
+                                print('Введите данные в правильном формате!')
+                        else:
+                            print('Введите данные в правильном формате!')
+                    else:
+                        print('Введите данные в правильном формате!')
               else:
                 pass
               print('после измений')
@@ -123,7 +161,7 @@ for dt in daterange(a, b, inclusive=True):
           rec_delta = ws.cell(column = 5, row = count, value = full_info[date][i][2])
           recycling_seconds = work_delta_seconds - work_time.seconds
           recycling_hour = recycling_seconds/3600
-          recycling_hour_round = round(recycling_hour,2) 
+          recycling_hour_round = round(recycling_hour,2)
           recycling_data = time.strftime('%H:%M:%S', time.gmtime(abs(recycling_seconds)))
           full_info[date][i][3] = recycling_seconds
           full_info[date][i][4] = recycling_hour
@@ -149,7 +187,7 @@ for dt in daterange(a, b, inclusive=True):
           count = count +1
     else:
         pass
-    
+
 
 wb.save("Декабрь_2018_вариант_1.xlsx")
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -201,9 +239,9 @@ for dt in daterange(a, b, inclusive=True):
             rec_date = ws_1.cell(column = 2, row = count, value = date)
             if name != 'Рощин':
                 value_for_record = datetime.time(full_info[date][i][0])
-                rec_time_start = ws_1.cell(column = 4, row = count, value = value_for_record) #3
+                rec_time_start = ws_1.cell(column = 3, row = count, value = value_for_record) #3
                 value_for_record = datetime.time(full_info[date][i][1])
-                rec_time_end = ws_1.cell(column = 3, row = count, value = value_for_record) #4
+                rec_time_end = ws_1.cell(column = 4, row = count, value = value_for_record) #4
                 rec_delta = ws_1.cell(column = 5, row = count, value = full_info[date][i][2])
                 if full_info[date][i][3] >= 0:
                         if full_info[date][i][7]!= 'auto':
@@ -241,4 +279,3 @@ for n in list_print_2:
 print('FINAL!')
 esc_out = input()
 print(full_info)
-
